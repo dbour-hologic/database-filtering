@@ -138,12 +138,16 @@ class DataFilters():
 
 		"""
 
-		if (operation == "ge"):
-			self.items = [words for words in self.items if len(words) >= length]
-		elif (operation == "le"):
-			self.items = [words for words in self.items if len(words) <= length]
-		else: 
-			self.items = [words for words in self.items if len(words) == length]
+		if not self.is_list:
+			if (operation == "ge"):
+				self.items = [words for words in self.items if len(words) >= length]
+			elif (operation == "le"):
+				self.items = [words for words in self.items if len(words) <= length]
+			else: 
+				self.items = [words for words in self.items if len(words) == length]
+		else:
+			print "Cannot perform action on list of words.\
+			\nPlease convert list to list of list with split_word()."
 
 	def clear_empty(self):
 
@@ -156,6 +160,27 @@ class DataFilters():
 		else:
 			print "Cannot perform action on list of list\
 			\nPlease convert list back to list of words."
+
+
+	def remove_duplicates(self):
+
+		"""
+		Scans the list to remove duplicates.
+		"""
+
+		unique_set = []
+
+		if not self.is_list:
+			for items in self.items:
+				if items not in unique_set:
+					unique_set.append(items)
+			
+			self.items = unique_set
+		else:
+			print "Cannot perform action on list of words.\
+			\nPlease convert list to list of list with split_word()."
+
+
 
 	def size_of_list(self):
 		print len(self.items)
@@ -175,13 +200,15 @@ x.split_word(" ")
 x.print_items()
 x.remove_funny()
 # x.size_of_list()
-x.filter_list(1, "le")
+x.filter_list(2, "ge")
 # x.size_of_list()
 x.print_items()
 x.rejoin_word()
 x.clear_empty()
 x.print_items()
-
+x.size_of_list()
+x.remove_duplicates()
+x.print_items()
 
 # def read_in_file(list_file):
 
