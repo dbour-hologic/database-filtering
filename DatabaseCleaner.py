@@ -64,8 +64,8 @@ class DataFilters():
 
 	def print_items(self):
 
-		for items in self.items:
-			print items
+		for number, items in enumerate(self.items):
+			print number,") ",items
 
 	def lower_case(self):
 
@@ -111,6 +111,20 @@ class DataFilters():
 			\nPlease convert list back to list of words."
 
 
+	def rejoin_word(self, delimiter=" "):
+
+		"""
+		Rejoins the split words back to a string, connecting
+		each word by the specified delimiter.
+		"""
+		if not self.is_list:
+			print "Cannot perform action on list of words.\
+			\nPlease convert list to list of list with split_word()."
+		else:
+			self.items = [delimiter.join(words) for words in self.items]
+			self.is_list = False
+
+
 	def filter_list(self, length, operation):
 
 		"""
@@ -131,8 +145,21 @@ class DataFilters():
 		else: 
 			self.items = [words for words in self.items if len(words) == length]
 
+	def clear_empty(self):
+
+		"""
+		Clears out all data entries that are blank
+		"""
+
+		if not self.is_list:
+			self.items = [words for words in self.items if not words == ""]
+		else:
+			print "Cannot perform action on list of list\
+			\nPlease convert list back to list of words."
+
 	def size_of_list(self):
 		print len(self.items)
+
 
 
 q = DatabaseEntry()
@@ -147,9 +174,12 @@ x.print_items()
 x.split_word(" ")
 x.print_items()
 x.remove_funny()
-x.size_of_list()
+# x.size_of_list()
 x.filter_list(1, "le")
-x.size_of_list()
+# x.size_of_list()
+x.print_items()
+x.rejoin_word()
+x.clear_empty()
 x.print_items()
 
 
