@@ -58,9 +58,12 @@ class DatabaseEntry:
 class DataFilters():
 
 	def __init__(self, database_object):
-		self.items = database_object.data
+
+		self.items = database_object.data 		# initializes the data structure
+		self.is_list = False					# if split_word() used, word is now a list.
 
 	def print_items(self):
+
 		for items in self.items:
 			print items
 
@@ -69,16 +72,67 @@ class DataFilters():
 		"""
 		Lower cases all characters
 		"""
-		self.items = [words.lower() for words in self.items]
+
+		if not self.is_list:
+			self.items = [words.lower() for words in self.items]
+		else:
+			print "Cannot perform action on list of list\
+			\nPlease convert list back to list of words."
 
 	def remove_funny(self):
 
 		""" 
 		Removes all special characters
 		"""
-		for number, check in enumerate(self.items):
-			self.items[number] = re.sub('[^A-Za-z0-9\s]+','',check)
 
+		if not self.is_list:
+			for number, check in enumerate(self.items):
+				self.items[number] = re.sub('[^A-Za-z0-9\s]+','',check)
+		else:
+			print "Cannot perform action on list of list\
+			\nPlease convert list back to list of words."
+
+	def split_word(self, delimiter):
+
+		""" 
+		Splits word on selected delimiter. 
+		Default is whitespace.
+
+		Args:
+			delimiter - Character to divide word on.
+
+		"""
+
+		if not self.is_list:
+			self.items = [words.split(delimiter) for words in self.items]
+			self.is_list = True
+		else:
+			print "Cannot perform action on list of list\
+			\nPlease convert list back to list of words."
+
+
+	def filter_list(self, length, operation):
+
+		"""
+		Filters the list depending on length input.
+
+		Args:
+			length - length to filter by.
+
+			operation - greater/equal(ge) to, equal to(eq), less/equal to(le)
+			Default is equal to.
+
+		"""
+
+		if (operation == "ge"):
+			self.items = [words for words in self.items if len(words) >= length]
+		elif (operation == "le"):
+			self.items = [words for words in self.items if len(words) <= length]
+		else: 
+			self.items = [words for words in self.items if len(words) == length]
+
+	def size_of_list(self):
+		print len(self.items)
 
 
 q = DatabaseEntry()
@@ -90,7 +144,13 @@ x.lower_case()
 x.print_items()
 x.remove_funny()
 x.print_items()
-
+x.split_word(" ")
+x.print_items()
+x.remove_funny()
+x.size_of_list()
+x.filter_list(1, "le")
+x.size_of_list()
+x.print_items()
 
 
 # def read_in_file(list_file):
