@@ -54,16 +54,7 @@ def read_in_file(list_file):
 def scanner(list_names):
 
 	"""
-		scanner(list_names): reads in the list of names
-		from a list with adjustable parameters to make
-		the search more/less strict when searching
-		for matches.
-
-		Args:
-			list_names(list): list of names to be searched for duplicates.
-
-		Returns:
-			list: list of UNIQUE names
+	
 	"""
 
 	pass
