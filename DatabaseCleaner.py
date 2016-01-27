@@ -8,6 +8,7 @@
 # Must install fuzzywuzzy to use - pip install fuzzywuzzy
 
 from sys import argv
+import re
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
@@ -53,17 +54,44 @@ class DatabaseEntry:
 			print err
 			print "Cannot read/find specified file."
 
-	def print_data(self):
-		for points in self.data:
-			print points
+
+class DataFilters():
+
+	def __init__(self, database_object):
+		self.items = database_object.data
+
+	def print_items(self):
+		for items in self.items:
+			print items
+
+	def lower_case(self):
+
+		"""
+		Lower cases all characters
+		"""
+		self.items = [words.lower() for words in self.items]
+
+	def remove_funny(self):
+
+		""" 
+		Removes all special characters
+		"""
+		for number, check in enumerate(self.items):
+			self.items[number] = re.sub('[^A-Za-z0-9\s]+','',check)
 
 
 
+q = DatabaseEntry()
+q.set_data(argv[1])
+
+x = DataFilters(q)
+x.print_items()
+x.lower_case()
+x.print_items()
+x.remove_funny()
+x.print_items()
 
 
-query = DatabaseEntry()
-query.set_data(argv[1])
-query.print_data()
 
 # def read_in_file(list_file):
 
