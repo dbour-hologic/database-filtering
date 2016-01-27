@@ -17,7 +17,18 @@ def read_in_file(list_file):
 	""" 
 		read_in_file(list_file): reads in a text file line by 
 		line to be used for further processing by other downstream
-		applications.
+		applications. File must be in the format described as shown
+		below.
+
+		file
+		----
+		file_example.txt
+
+		content
+		-------
+		item1
+		item2
+		item3
 
 		Args:
 			list_file(file): name of file to read from.
@@ -29,16 +40,30 @@ def read_in_file(list_file):
 	# holds all of the lines in a list
 	name_list = []
 
-	with open(list_file, "r") as working_file:
-		for lines in working_file:
-			names = lines.rstrip()
-			name_list.append(names)
+	try:
+		with open(list_file, "r") as working_file:
+			for lines in working_file:
+				names = lines.rstrip()
+				name_list.append(names)
+	except IOError as err:
+		print err
+		pass
 
 	return name_list
 
+def scanner(list_names):
 
+	"""
+		scanner(list_names): reads in the list of names
+		from a list with adjustable parameters to make
+		the search more/less strict when searching
+		for matches.
 
+		Args:
+			list_names(list): list of names to be searched for duplicates.
 
+		Returns:
+			list: list of UNIQUE names
+	"""
 
-
-
+	pass
