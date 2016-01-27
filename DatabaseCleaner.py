@@ -54,7 +54,6 @@ def read_in_file(list_file):
 def scanner(list_names):
 
 	"""
-	
 	"""
 
 	pass
