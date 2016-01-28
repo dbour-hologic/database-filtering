@@ -13,7 +13,7 @@ from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
 
-class DatabaseEntry:
+class DatabaseEntry():
 
 	""" 
 
@@ -50,9 +50,11 @@ class DatabaseEntry:
 				for lines in working_file:
 					names = lines.rstrip()
 					self.data.append(names)
+			return True
 		except IOError as err:
 			print err
 			print "Cannot read/find specified file."
+			return False
 
 
 class DataFilters():
@@ -218,7 +220,6 @@ class DataFilters():
 		return filtered_list
 
 
-
 	def cluster(self, threshold):
 
 
@@ -233,8 +234,6 @@ class DataFilters():
 			clustered_list - clustered list of similar items.
 
 		"""
-
-		
 
 		# List of list of similar items
 		clustered_list = []
@@ -256,89 +255,104 @@ class DataFilters():
 			if len(temp_cluster) != 0:
 				clustered_list.append(temp_cluster)
 
-		sum_total = 0
-		for y in clustered_list:
-			sum_total += len(y)
-
-		print "COUNT BEFORE CLUSTER_________"
-		print len(self.items)
-		print "COUNT AFTER CLUSTER__________"
-		print sum_total
-
 		return clustered_list
 
 
 	def size_of_list(self):
 		print len(self.items)
 
+def main():
+
+	db = DatabaseEntry()
+	dF = DatabaseEntry(db)
+
+	curr_lists = {}
+
+	in_process = True
+
+	while(in_process):
+		print "DATA PROCESSER: To begin... please choose a file to upload."
+		file_name = raw_input("File name: ")
+		if (db.set_data(file_name)):
+			in_process = False
+
+	while(True):
+
+		command_prompt = raw_input("Enter Command> ")
+		command_prompt = command.lower()
+
+		if command_prompt == "print":
+			dF.print_items()
+
+		elif command_prompt == "lowercase":
+			dF.lower_case()
+
+		elif command_prompt == "remove funny":
+			dF.remove_funny()
+
+		elif command_prompt == "split word":
+			delimiter = raw_input("What delimiter to use to split word? ")
+			dF.split(delimiter)
+
+		elif command_prompt == "rejoin word":
+			rj_delimiter = raw_input("What delimiter to use to rejoin word? ")
+			dF.rejoin_word(rj_delimiter)
+
+		elif command_prompt == "filter":
+			operation = raw_input("Operation type - greater than\equal(ge),\
+				less than\equal(le), or equal to(eq): ")
+			length = raw_input("Length limit: ")
+			length = int(length)
+			dF.filter_list(length, operation)
+
+		elif command_prompt == "clear empty":
+			dF.clear_empty()
+
+		elif command_prompt == "remove duplicates":
+			dF.remove_duplicates()
+
+		elif command_prompt == "partition":
+			regex = raw_input("Enter regex pattern: ")
+			name_list = raw_input("Please name the return list: ")
+			partition = dF.partition(regex)
+			curr_lists[name_list] = partition
+
+		elif command_prompt == "cluster":
+			threshold = raw_input("Please enter cluster threshold: ")
+			name_cluster = raw_input("Please name the return cluster list:" )
+			cluster = dF.cluster
 
 
-q = DatabaseEntry()
-q.set_data(argv[1])
+if __name__ == "__main__":
+	main()
 
-x = DataFilters(q)
-x.size_of_list()
-x.clear_empty()
-x.size_of_list()
-# x.print_items()
-x.cluster(5)
-# x.print_items()
-# x.partition('.*\\\\.*|.*/.*')
-# x.lower_case()
-# x.print_items()
-# # x.remove_funny()
-# x.print_items()
+# q = DatabaseEntry()
+# q.set_data(argv[1])
+
+# x = DataFilters(q)
+# x.size_of_list()
 # x.clear_empty()
-# x.split_word(" ")
-# x.print_items()
-# # x.remove_funny()
-# # x.size_of_list()
-# x.filter_list(2, "le")
-# # x.size_of_list()
-# x.print_items()
-# x.rejoin_word()
-# # x.clear_empty()
+# x.size_of_list()
 # # x.print_items()
-# # x.size_of_list()
-# x.remove_duplicates()
-# x.print_items()
-# x.cluster()
-
-# def read_in_file(list_file):
-
-# 	""" 
-# 		read_in_file(list_file): reads in a text file line by 
-# 		line to be used for further processing by other downstream
-# 		applications. File must be in the format described as shown
-# 		below.
-
-# 		file
-# 		----
-# 		file_example.txt
-
-# 		content
-# 		-------
-# 		item1
-# 		item2
-# 		item3
-
-# 		Args:
-# 			list_file(file): name of file to read from.
-
-# 		Returns:
-# 			list: a list of lines read by the file scanner.
-# 	"""
-
-# 	# holds all of the lines in a list
-# 	name_list = []
-
-# 	try:
-# 		with open(list_file, "r") as working_file:
-# 			for lines in working_file:
-# 				names = lines.rstrip()
-# 				name_list.append(names)
-# 	except IOError as err:
-# 		print err
-# 		pass
-
-# 	return name_list
+# x.cluster(5)
+# # x.print_items()
+# # x.partition('.*\\\\.*|.*/.*')
+# # x.lower_case()
+# # x.print_items()
+# # # x.remove_funny()
+# # x.print_items()
+# # x.clear_empty()
+# # x.split_word(" ")
+# # x.print_items()
+# # # x.remove_funny()
+# # # x.size_of_list()
+# # x.filter_list(2, "le")
+# # # x.size_of_list()
+# # x.print_items()
+# # x.rejoin_word()
+# # # x.clear_empty()
+# # # x.print_items()
+# # # x.size_of_list()
+# # x.remove_duplicates()
+# # x.print_items()
+# # x.cluster()
