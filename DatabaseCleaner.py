@@ -82,7 +82,7 @@ class DataFilters():
 	def remove_funny(self):
 
 		""" 
-		Removes all special characters
+		Removes all special characters in the words
 		"""
 
 		if not self.is_list:
@@ -110,12 +110,15 @@ class DataFilters():
 			print "Cannot perform action on list of list\
 			\nPlease convert list back to list of words."
 
-
 	def rejoin_word(self, delimiter=" "):
 
 		"""
 		Rejoins the split words back to a string, connecting
 		each word by the specified delimiter.
+
+		Args:
+			delimiter - character used to rejoin the list.
+			Default is white space.
 		"""
 		if not self.is_list:
 			print "Cannot perform action on list of words.\
@@ -123,7 +126,6 @@ class DataFilters():
 		else:
 			self.items = [delimiter.join(words) for words in self.items]
 			self.is_list = False
-
 
 	def filter_list(self, length, operation):
 
@@ -138,7 +140,7 @@ class DataFilters():
 
 		"""
 
-		if not self.is_list:
+		if self.is_list:
 			if (operation == "ge"):
 				self.items = [words for words in self.items if len(words) >= length]
 			elif (operation == "le"):
@@ -152,15 +154,17 @@ class DataFilters():
 	def clear_empty(self):
 
 		"""
-		Clears out all data entries that are blank
+		Clears out all data entries that are blank or 
+		only contains special characters.
 		"""
 
+		reg_pattern = re.compile(r'^[\W]+$')
+
 		if not self.is_list:
-			self.items = [words for words in self.items if not words == ""]
+			self.items = [words for words in self.items if not (words == "" or reg_pattern.match(r'%s' % words))]
 		else:
 			print "Cannot perform action on list of list\
 			\nPlease convert list back to list of words."
-
 
 	def remove_duplicates(self):
 
@@ -181,6 +185,88 @@ class DataFilters():
 			\nPlease convert list to list of list with split_word()."
 
 
+	def partition(self, key):
+
+		"""
+		Uses regex to move specified items to a separate list. Removes
+		said items from original list.
+
+		Args:
+			key - regex pattern, recommended to add 'r' in the
+			parameter for raw string search. i.e. (r'string pattern here')
+
+		return:
+			filtered_list - a list containing matches to the regex pattern
+		"""
+
+		# Filtered list
+		filtered_list = []
+
+		if not self.is_list:
+			# Creation of regex
+			pattern = re.compile(r'%s' % key)
+
+			for items in self.items:
+				if (pattern.match(r'%s' % items)):
+					filtered_list.append(items)
+					self.items.remove(items)
+
+		else:
+			print "Cannot perform action on list of list\
+			\nPlease convert list back to list of words."
+
+		return filtered_list
+
+
+
+	def cluster(self, threshold):
+
+
+		""" Use of fuzzywuzzy library to cluster 
+		similar items together.
+
+
+		Args:
+			threshold - percent identity to call a match.
+
+		return:
+			clustered_list - clustered list of similar items.
+
+		"""
+
+		
+
+		# List of list of similar items
+		clustered_list = []
+
+		# Create a copy of the original list to aid in comparisons.
+		is_copy = [z for z in self.items]
+
+		for items in self.items:
+			
+			# Holds the similar items together
+			temp_cluster = []
+
+			for comparisons in is_copy:
+				if (fuzz.token_set_ratio(items, comparisons) > threshold):
+					temp_cluster.append(comparisons)
+					is_copy.remove(comparisons)
+
+			# Checks if any matches were made, don't add if no clustered made.
+			if len(temp_cluster) != 0:
+				clustered_list.append(temp_cluster)
+
+		sum_total = 0
+		for y in clustered_list:
+			sum_total += len(y)
+
+		print "COUNT BEFORE CLUSTER_________"
+		print len(self.items)
+		print "COUNT AFTER CLUSTER__________"
+		print sum_total
+
+		return clustered_list
+
 
 	def size_of_list(self):
 		print len(self.items)
@@ -191,24 +277,32 @@ q = DatabaseEntry()
 q.set_data(argv[1])
 
 x = DataFilters(q)
-x.print_items()
-x.lower_case()
-x.print_items()
-x.remove_funny()
-x.print_items()
-x.split_word(" ")
-x.print_items()
-x.remove_funny()
-# x.size_of_list()
-x.filter_list(2, "ge")
-# x.size_of_list()
-x.print_items()
-x.rejoin_word()
-x.clear_empty()
-x.print_items()
 x.size_of_list()
-x.remove_duplicates()
-x.print_items()
+x.clear_empty()
+x.size_of_list()
+# x.print_items()
+x.cluster(5)
+# x.print_items()
+# x.partition('.*\\\\.*|.*/.*')
+# x.lower_case()
+# x.print_items()
+# # x.remove_funny()
+# x.print_items()
+# x.clear_empty()
+# x.split_word(" ")
+# x.print_items()
+# # x.remove_funny()
+# # x.size_of_list()
+# x.filter_list(2, "le")
+# # x.size_of_list()
+# x.print_items()
+# x.rejoin_word()
+# # x.clear_empty()
+# # x.print_items()
+# # x.size_of_list()
+# x.remove_duplicates()
+# x.print_items()
+# x.cluster()
 
 # def read_in_file(list_file):
 
