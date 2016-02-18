@@ -56,7 +56,6 @@ class DatabaseEntry():
 			print "Cannot read/find specified file."
 			return False
 
-
 class DataFilters():
 
 	def __init__(self, database_object):
@@ -242,11 +241,12 @@ class DataFilters():
 		is_copy = [z for z in self.items]
 
 		for items in self.items:
-			
+
 			# Holds the similar items together
 			temp_cluster = []
 
 			for comparisons in is_copy:
+
 				if (fuzz.token_set_ratio(items, comparisons) > threshold):
 					temp_cluster.append(comparisons)
 					is_copy.remove(comparisons)
@@ -264,22 +264,23 @@ class DataFilters():
 def main():
 
 	db = DatabaseEntry()
-	dF = DatabaseEntry(db)
+	dF = DataFilters(db)
 
 	curr_lists = {}
+	curr_file = ""
 
 	in_process = True
 
 	while(in_process):
 		print "DATA PROCESSER: To begin... please choose a file to upload."
-		file_name = raw_input("File name: ")
-		if (db.set_data(file_name)):
+		curr_file = raw_input("File name: ")
+		if (db.set_data(curr_file)):
 			in_process = False
 
 	while(True):
 
 		command_prompt = raw_input("Enter Command> ")
-		command_prompt = command.lower()
+		command_prompt = command_prompt.lower()
 
 		if command_prompt == "print":
 			dF.print_items()
@@ -292,7 +293,7 @@ def main():
 
 		elif command_prompt == "split word":
 			delimiter = raw_input("What delimiter to use to split word? ")
-			dF.split(delimiter)
+			dF.split_word(delimiter)
 
 		elif command_prompt == "rejoin word":
 			rj_delimiter = raw_input("What delimiter to use to rejoin word? ")
@@ -319,8 +320,36 @@ def main():
 
 		elif command_prompt == "cluster":
 			threshold = raw_input("Please enter cluster threshold: ")
+			threshold = int(threshold)
 			name_cluster = raw_input("Please name the return cluster list:" )
-			cluster = dF.cluster
+			cluster = dF.cluster(threshold)
+			curr_lists[name_cluster] = cluster
+
+		elif command_prompt == "more":
+			for key, value in curr_lists.iteritems():
+				print key
+
+			do_proceed = raw_input("Would you like to print? (y/n) ")
+			if (do_proceed == "y"):
+				get_dict_name = raw_input("Which list would you like to print? ")
+				get_dict = curr_lists[get_dict_name]
+				print get_dict, len(get_dict)
+				for items in get_dict:
+					print items
+			else:
+				pass
+
+		elif command_prompt == "reset":
+			do_reset = raw_input("Are you sure you'd like to reset the data? (y/n) ")
+			if (do_reset == "y"):
+				db = DatabaseEntry()
+				dF = DataFilters(db)
+				db.set_data(curr_file)
+			else:
+				pass
+
+		elif command_prompt == "quit":
+			break
 
 
 if __name__ == "__main__":
