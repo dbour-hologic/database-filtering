@@ -8,10 +8,65 @@
 # Must install fuzzywuzzy to use - pip install fuzzywuzzy
 
 from sys import argv
-import re
+import re, itertools
 from fuzzywuzzy import fuzz
 from fuzzywuzzy import process
 
+
+
+class DataCluster():
+
+	""" Class acts as a helper to create an object that
+	keeps track of similar items using FuzzyWuzzy. This class
+	will sort the items using FuzzyWuzzy as the key function 
+	in the sorted(<arg>,<key="">) built-in utility. 
+
+	Essentially, each word in the list will have a specific
+	"seed" or "key" value associated with it and this is what
+	the sorted function will use to sort by. Example:
+
+	<key>     | <value>
+	1. JOBS   | JOBS
+	2. JOB    | JOBS (same key as #1)
+	3. APPLE  | APPLE
+	4. APPLES | APPLE
+
+	This grouping works by setting the first encountered word as the
+	"seed"/"key" value. This does not take into the account of the scenario
+	of given items A,B,C... If A & B are similar, but A is not similar to C,
+	but B & C are similar, how do you group them? 
+
+	Only then, the itertools groupby() function can be used 
+	to group similar items into array clusters.
+
+	The adapted idea was found from the link below:
+	http://stackoverflow.com/questions/11535483/fuzzy-group-by-grouping-similar-words
+	"""
+
+	def __init__(self, threshold):
+
+		# This is the unique key for every word that will be used to sort by
+		self.seeds = set()
+
+		# This contains all of the words with its value associated with a unique seed
+		self.cache = dict()
+
+		# This is the threshold cutoff used by FuzzyWuzzy
+		self.threshold = threshold
+
+	def get_seed(self, word):
+
+		seed = self.cache.get(word, None)
+
+		if seed is not None:
+			return seed
+		for seed in self.seeds:
+			if (fuzz.token_set_ratio(seed, word) >= self.threshold):
+				self.cache[word] = seed
+				return seed
+		self.seeds.add(word)
+		self.cache[word] = word
+		return word
 
 class DatabaseEntry():
 
@@ -229,32 +284,16 @@ class DataFilters():
 			threshold - percent identity to call a match.
 
 		return:
-			clustered_list - clustered list of similar items.
+			clustered list of similar items.
 
 		"""
 
-		# List of list of similar items
-		clustered_list = []
 
-		# Create a copy of the original list to aid in comparisons.
-		is_copy = [z for z in self.items]
+		cluster = DataCluster(threshold)
+		sort_cluster = sorted(self.items, key=cluster.get_seed)
+		group_cluster = itertools.groupby(sort_cluster, key=cluster.get_seed)
 
-		for items in self.items:
-
-			# Holds the similar items together
-			temp_cluster = []
-
-			for comparisons in is_copy:
-
-				if (fuzz.token_set_ratio(items, comparisons) > threshold):
-					temp_cluster.append(comparisons)
-					is_copy.remove(comparisons)
-
-			# Checks if any matches were made, don't add if no clustered made.
-			if len(temp_cluster) != 0:
-				clustered_list.append(temp_cluster)
-
-		return clustered_list
+		return [list(value) for key, value in group_cluster]
 
 
 	def size_of_list(self):
