@@ -200,6 +200,7 @@ class DataFilters():
 			filtered_list - a list containing matches to the regex pattern
 		"""
 
+
 		# Filtered list
 		filtered_list = []
 
@@ -207,10 +208,8 @@ class DataFilters():
 			# Creation of regex
 			pattern = re.compile(r'%s' % key)
 
-			for items in self.items:
-				if (pattern.match(r'%s' % items)):
-					filtered_list.append(items)
-					self.items.remove(items)
+			filtered_list = [items_filter for items_filter in self.items if pattern.match(r'%s' % items_filter)]
+			self.items[:] = [items for items in self.items if not pattern.match(r'%s' % items)]
 
 		else:
 			print "Cannot perform action on list of list\
@@ -260,6 +259,69 @@ class DataFilters():
 
 	def size_of_list(self):
 		print len(self.items)
+
+	def blanket_filter(self):
+		""" 
+		Iterates through the original db object and removes
+		names that meet a set threshold when compared
+		to the blanket_filter file. 
+
+		The blanket filter file has a list of names that can be compared
+		against the original list of names. FuzzyWuzzy will be used to compare
+		both list and remove all items from the original list where 
+		the threshold specification is met. 
+		"""
+
+		# Blanket list 
+		blanket_list = []
+
+		# Keeps track of how many items were removed
+		count_removals = 0 
+
+		get_blanket_file = raw_input("Name of filter file? ")
+
+		while(True):
+			try:
+				with open(get_blanket_file, 'rb') as working_file:
+					for lines in working_file:
+						names = lines.rstrip().lower()
+						blanket_list.append(names)
+				break
+			except IOError as err:
+				print err
+				print "Cannot read/find specified file."
+				continue
+			
+		get_threshold_value = raw_input("Set threshold value: ")
+		get_threshold_value = int(get_threshold_value)
+
+		for comparators in blanket_list:
+			for items in self.items:
+				if (fuzz.token_set_ratio(items, comparators) > get_threshold_value):
+					self.items.remove(items)
+					count_removals += 1
+
+		print "Removed %s" % count_removals
+
+		return None
+
+	def save_to_drive(self):
+
+		"""
+		Save current list to save to drive 
+		"""
+
+		if self.is_list:
+			print "Cannot save list as list of list, please convert back to string using 'rejoin word'"
+		else:
+			save_as = raw_input("Save file as: ")
+			with open(save_as, "w") as saved_file:
+				for content in self.items:
+					saved_file.write(content+"\n")
+					print content
+
+		print "Finished saving."
+
 
 def main():
 
@@ -333,7 +395,7 @@ def main():
 			if (do_proceed == "y"):
 				get_dict_name = raw_input("Which list would you like to print? ")
 				get_dict = curr_lists[get_dict_name]
-				print get_dict, len(get_dict)
+				
 				for items in get_dict:
 					print items
 			else:
@@ -348,8 +410,59 @@ def main():
 			else:
 				pass
 
+		elif command_prompt == "blanket filter":
+			dF.blanket_filter()
+
 		elif command_prompt == "quit":
 			break
+
+		elif command_prompt == "clear mod list":
+			really_reset = raw_input("Are you sure you'd like to remove all modified lists? (y/n")
+			if (really_reset == "y"):
+				curr_lists = {}
+			else:
+				pass
+
+		elif command_prompt == "save":
+			dF.save_to_drive()
+
+
+		elif command_prompt == "save mod":
+
+			selected_list = []
+
+			for key, value in curr_lists.iteritems():
+				print "List Name: %s" % key
+
+			list_chosen = raw_input("Please select which list you'd like to save. ")
+			selected_list = curr_lists[list_chosen]
+
+			save_mod_as = raw_input("Save file as: ")
+
+			with open(save_mod_as,"w") as save_to_file:
+
+				if (isinstance(selected_list[0], (list))):
+					
+					for content in selected_list:
+
+						combined_string = ""
+
+						for num, items in enumerate(content):
+							if (num == len(content)-1):
+								combined_string += items
+							else:
+								combined_string += items + ","
+						
+						save_to_file.write(combined_string+"\n")
+
+				else:
+
+					for content in selected_list:
+
+						save_to_file.write(content+"\n")
+
+			print "Jobs Done"
+	
 
 
 if __name__ == "__main__":
